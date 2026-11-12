@@ -4,21 +4,31 @@
 
 当前只有 URL 规范化和本地响应服务器，包含条件响应及不同租户/语言表示；没有缓存、合并刷新或容量管理实现。
 
-`service.py` 与根目录 `test_service.py` 保留现有接口和回归测试。`tests/test_baseline.py` 同时加载原测试和离线演示测试，不替换或跳过原断言。`demo.py` 只展示当前底座，不代表待开发工作流已经完成。
+`service.py` 保持已有规范化接口。根目录 `test_service.py` 为原有回归测试，`tests/test_baseline.py` 会同时加载原测试和离线演示验证。
 
 ## 环境和运行
 
-固定 Python 3.11.10，仅使用标准库；无需安装依赖、登录账号或下载数据。`pyproject.toml` 登记 unittest 入口，不是可安装的软件包。在仓库根目录运行：
+使用 Python 3.11.10，仅依赖标准库，无需登录账号、安装第三方包或下载数据。`.python-version` 固定解释器版本；`pyproject.toml` 仅登记 unittest 入口，项目不需要打包安装。
+
+在仓库根目录执行：
 
 ```sh
 python3 -m unittest discover -s tests -v
 python3 demo.py
 ```
 
-测试与演示使用相同的本地合成材料，不连接生产系统。文件状态写入临时目录，重复执行不污染仓库。完整展示可执行 `python3 -m unittest discover -s tests -v && python3 demo.py`；无任意等待，预期在 90 秒以内完成。最终工作流应扩展这条展示路径并真实输出其结果，而非回放日志。
+完整演示命令：
 
-## 扩展边界
+```sh
+python3 -m unittest discover -s tests -v && python3 demo.py
+```
 
-fixture_server.py 和 fixtures/site.json 是本机 HTTP 响应器，可直接构造不同表示；未提供线上凭据或其他附件。
+演示实时读取合成输入并运行当前接口，通常在 90 秒以内结束，不回放历史日志。状态写入临时目录，重复执行不污染仓库；本地 HTTP 示例只访问回环地址，不连接生产系统。
 
-当前测试只保证既有底座行为。新增流程仍需覆盖任务要求中的中断、重复、并发和人工边界，不应将底座演示作为完成证明。
+## 合成来源
+
+`fixture_server.site()` 在上下文内监听本机随机端口并自动清理。`fixtures/site.json` 包含条件响应、租户/语言表示、禁止存储与错误响应。服务器是合成来源，不包含客户端缓存逻辑。
+
+## 能力边界
+
+当前自动化验证覆盖已有接口和离线响应器。业务编排、持久化的流程决策与跨模块恢复不属于当前实现范围，演示输出不代表这些扩展能力已经存在。
