@@ -1,0 +1,49 @@
+{
+  "/robots.txt": {
+    "status": 200,
+    "body": "User-agent: *\nDisallow: /private\n",
+    "type": "text/plain"
+  },
+  "/sitemap.xml": {
+    "status": 200,
+    "body": "<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><sitemap><loc>{base}/section.xml</loc></sitemap></sitemapindex>",
+    "type": "application/xml"
+  },
+  "/section.xml": {
+    "status": 200,
+    "body": "<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><sitemap><loc>{base}/sitemap.xml</loc></sitemap><sitemap><loc>{base}/pages.xml</loc></sitemap></sitemapindex>",
+    "type": "application/xml"
+  },
+  "/pages.xml": {
+    "status": 200,
+    "body": "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><url><loc>{base}/article?id=4&amp;utm_source=mail</loc></url><url><loc>{base}/old</loc></url><url><loc>{base}/missing</loc></url></urlset>",
+    "type": "application/xml"
+  },
+  "/article": {
+    "status": 200,
+    "etag": "\"v1\"",
+    "last_modified": "Wed, 11 Nov 2026 00:00:00 GMT",
+    "body": "<html><link rel=\"canonical\" href=\"{base}/article?id=4\"><h1>合成内容</h1></html>",
+    "type": "text/html"
+  },
+  "/old": {
+    "status": 302,
+    "location": "/article?id=4",
+    "body": ""
+  },
+  "/loop-a": {
+    "status": 302,
+    "location": "/loop-b",
+    "body": ""
+  },
+  "/loop-b": {
+    "status": 302,
+    "location": "/loop-a",
+    "body": ""
+  },
+  "/temporary": {
+    "status": 503,
+    "retry_after": "5",
+    "body": "try later"
+  }
+}
