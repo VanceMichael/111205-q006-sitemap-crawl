@@ -45,5 +45,41 @@
     "status": 503,
     "retry_after": "5",
     "body": "try later"
+  },
+  "/localized": {
+    "status": 200,
+    "body": "anonymous",
+    "vary": "X-Tenant, Accept-Language, Accept-Encoding",
+    "cache_control": "max-age=5, stale-if-error=10",
+    "variants": {
+      "anonymous:en": {
+        "body": "anonymous catalogue",
+        "etag": "\"anon-en\""
+      },
+      "north:en": {
+        "body": "north catalogue",
+        "etag": "\"north-en\""
+      },
+      "north:zh": {
+        "body": "北方目录",
+        "etag": "\"north-zh\""
+      },
+      "south:en": {
+        "body": "south catalogue",
+        "etag": "\"south-en\""
+      }
+    }
+  },
+  "/no-store": {
+    "status": 200,
+    "body": "synthetic transient private data",
+    "cache_control": "no-store",
+    "vary": "*"
+  },
+  "/revalidate": {
+    "status": 200,
+    "body": "check before reuse",
+    "etag": "\"check\"",
+    "cache_control": "no-cache"
   }
 }

@@ -1,3 +1,4 @@
+import gzip
 import json
 from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -13,17 +14,25 @@ def site():
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
             route = routes.get(urlsplit(self.path).path, {'status': 404, 'body': 'not found'})
+            if 'variants' in route:
+                tenant = self.headers.get('X-Tenant', 'anonymous')
+                language = self.headers.get('Accept-Language', 'en')
+                key = tenant + ':' + language
+                route = {**route, **route['variants'].get(key, route['variants']['anonymous:en'])}
             status = route['status']
             if route.get('etag') and self.headers.get('If-None-Match') == route['etag']:
                 status = 304
             elif not self.headers.get('If-None-Match') and route.get('last_modified') and self.headers.get('If-Modified-Since') == route['last_modified']:
                 status = 304
             self.send_response(status)
-            for key, header in [('etag', 'ETag'), ('last_modified', 'Last-Modified'), ('location', 'Location'), ('retry_after', 'Retry-After')]:
+            for key, header in [('etag', 'ETag'), ('last_modified', 'Last-Modified'), ('location', 'Location'), ('retry_after', 'Retry-After'), ('vary', 'Vary'), ('cache_control', 'Cache-Control')]:
                 if key in route:
                     self.send_header(header, route[key])
             self.send_header('Content-Type', route.get('type', 'text/plain') + '; charset=utf-8')
             body = route['body'].replace('{base}', self.server.base).encode() if status != 304 else b''
+            if status == 200 and 'gzip' in self.headers.get('Accept-Encoding', ''):
+                body = gzip.compress(body, mtime=0)
+                self.send_header('Content-Encoding', 'gzip')
             self.send_header('Content-Length', str(len(body)))
             self.end_headers()
             self.wfile.write(body)
