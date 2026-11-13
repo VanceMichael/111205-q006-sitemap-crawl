@@ -81,5 +81,17 @@
     "body": "check before reuse",
     "etag": "\"check\"",
     "cache_control": "no-cache"
+  },
+  "/vary-shift": {
+    "status": 200,
+    "body": "varying negotiation",
+    "etag": "\"shift-v1\"",
+    "vary": "X-Tenant",
+    "cache_control": "max-age=0",
+    "on_304": {
+      "vary": "X-Tenant, Accept-Language",
+      "cache_control": "max-age=5",
+      "etag": "\"shift-v1\""
+    }
   }
 }

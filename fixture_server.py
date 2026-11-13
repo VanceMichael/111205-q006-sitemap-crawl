@@ -8,12 +8,18 @@ from urllib.parse import urlsplit
 
 
 @contextmanager
-def site():
+def site(recorder=None):
     routes = json.loads((Path(__file__).parent / 'fixtures/site.json').read_text())
 
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
-            route = routes.get(urlsplit(self.path).path, {'status': 404, 'body': 'not found'})
+            path = urlsplit(self.path).path
+            if recorder is not None:
+                recorder.append({
+                    'path': path,
+                    'headers': {k: v for k, v in self.headers.items()},
+                })
+            route = routes.get(path, {'status': 404, 'body': 'not found'})
             if 'variants' in route:
                 tenant = self.headers.get('X-Tenant', 'anonymous')
                 language = self.headers.get('Accept-Language', 'en')
@@ -24,6 +30,9 @@ def site():
                 status = 304
             elif not self.headers.get('If-None-Match') and route.get('last_modified') and self.headers.get('If-Modified-Since') == route['last_modified']:
                 status = 304
+            if status == 304 and route.get('on_304'):
+                # 模拟来源在重验证后调整缓存策略（例如 Vary 变化）。
+                route = {**route, **route['on_304']}
             self.send_response(status)
             for key, header in [('etag', 'ETag'), ('last_modified', 'Last-Modified'), ('location', 'Location'), ('retry_after', 'Retry-After'), ('vary', 'Vary'), ('cache_control', 'Cache-Control')]:
                 if key in route:
